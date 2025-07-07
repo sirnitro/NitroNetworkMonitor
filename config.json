@@ -1,55 +1,55 @@
 {
   "ping_interval_seconds": 60,
   "gmail": {
-    "from": "network.bot@example.com",
-    "to": "admin@example.com",
+    "from": "tmnt.monitor@example.com",
+    "to": "splinter@example.com",
     "app_password": "your-fake-app-password"
   },
   "devices": [
     {
-      "name": "Warp Core",
-      "ip": "192.168.42.10",
-      "mac": "AA:BB:CC:00:00:01"
+      "name": "Leonardo's Blade",
+      "ip": "192.168.100.10",
+      "mac": "00:11:22:AA:BB:01"
     },
     {
-      "name": "Holodeck",
-      "ip": "192.168.42.11",
-      "mac": "AA:BB:CC:00:00:02"
+      "name": "Donatello's Lab",
+      "ip": "192.168.100.11",
+      "mac": "00:11:22:AA:BB:02"
     },
     {
-      "name": "Bridge Console",
-      "ip": "192.168.42.12",
-      "mac": "AA:BB:CC:00:00:03"
+      "name": "Michelangelo's Pizza Box",
+      "ip": "192.168.100.12",
+      "mac": "00:11:22:AA:BB:03"
     },
     {
-      "name": "Engineering Bay",
-      "ip": "192.168.42.13",
-      "mac": "AA:BB:CC:00:00:04"
+      "name": "Raphael's Rage Rig",
+      "ip": "192.168.100.13",
+      "mac": "00:11:22:AA:BB:04"
     },
     {
-      "name": "Mainframe",
-      "ip": "192.168.42.14",
-      "mac": "AA:BB:CC:00:00:05"
+      "name": "Splinter's Den",
+      "ip": "192.168.100.14",
+      "mac": "00:11:22:AA:BB:05"
     },
     {
-      "name": "Cryo Chamber",
-      "ip": "192.168.42.15",
-      "mac": "AA:BB:CC:00:00:06"
+      "name": "April's News Station",
+      "ip": "192.168.100.15",
+      "mac": "00:11:22:AA:BB:06"
     },
     {
-      "name": "Starlight Node",
-      "ip": "192.168.42.16",
-      "mac": "AA:BB:CC:00:00:07"
+      "name": "Casey's Mask Hub",
+      "ip": "192.168.100.16",
+      "mac": "00:11:22:AA:BB:07"
     },
     {
-      "name": "Astro Lab",
-      "ip": "192.168.42.17",
-      "mac": "AA:BB:CC:00:00:08"
+      "name": "Shredder's Hideout",
+      "ip": "192.168.100.17",
+      "mac": "00:11:22:AA:BB:08"
     },
     {
-      "name": "Nebula Drive",
-      "ip": "192.168.42.18",
-      "mac": "AA:BB:CC:00:00:09"
+      "name": "Krang's Dimension X",
+      "ip": "192.168.100.18",
+      "mac": "00:11:22:AA:BB:09"
     }
   ]
 }
