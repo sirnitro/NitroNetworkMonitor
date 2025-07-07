@@ -7,12 +7,18 @@ from ping3 import ping
 import logging
 import smtplib
 from email.mime.text import MIMEText
-from datetime import datetime, timedelta
+from datetime import datetime
 import os
 from PIL import Image, ImageTk
 import pystray
 import sys
 import winsound
+import webbrowser
+import platform
+
+# App metadata
+APP_VERSION = "1.3.0"
+LAST_UPDATED = "2025-07-07"
 
 # Load config
 def load_config():
@@ -69,7 +75,7 @@ def send_email(subject, body):
 class MonitorApp:
     def __init__(self, master):
         self.master = master
-        master.title("Clint's Network Monitor — Network Watchtower")
+        master.title("Nitro's Network Monitor — Network Watchtower")
         master.configure(bg='#0d0d0d')
 
         style = ttk.Style()
@@ -92,14 +98,27 @@ class MonitorApp:
         self.tab_control.add(self.about_frame, text=' About ')
         self.tab_control.pack(expand=1, fill="both")
 
-        about_text = f"""
-Clint's Network Monitor
-
-Email: {CONTACT_EMAIL}
-GitHub: {GITHUB_URL}
-        """
-        about_label = tk.Label(self.about_frame, text=about_text.strip(), font=("Share Tech Mono", 11), fg="#00ffff", bg="#0d0d0d", justify=tk.LEFT)
-        about_label.pack(padx=10, pady=20)
+        self.about_text = tk.Text(self.about_frame, height=14, bg="#0d0d0d", fg="#00ffff", font=("Share Tech Mono", 10), borderwidth=0, highlightthickness=0)
+        self.about_text.insert(tk.END, f"Nitro's Network Monitor — Network Watchtower\n")
+        self.about_text.insert(tk.END, f"Version: {APP_VERSION}\n")
+        self.about_text.insert(tk.END, f"Last Updated: {LAST_UPDATED}\n\n")
+        self.about_text.insert(tk.END, "Email: ")
+        self.about_text.insert(tk.END, CONTACT_EMAIL + "\n", ("link_email",))
+        self.about_text.insert(tk.END, "GitHub: ")
+        self.about_text.insert(tk.END, GITHUB_URL + "\n", ("link_github",))
+        self.about_text.insert(tk.END, f"\nSystem: {platform.system()} {platform.release()} | Python {platform.python_version()}\n")
+        self.about_text.insert(tk.END, "\nPowered by:\n")
+        self.about_text.insert(tk.END, "• Python & Tkinter\n")
+        self.about_text.insert(tk.END, "• ping3 by Dan Hunsaker\n")
+        self.about_text.insert(tk.END, "• Pillow (PIL)\n")
+        self.about_text.insert(tk.END, "• pystray\n")
+        self.about_text.insert(tk.END, "\nHint: Press Ctrl+Shift+H for a surprise 😉")
+        self.about_text.tag_config("link_email", foreground="#00ffff", underline=1)
+        self.about_text.tag_config("link_github", foreground="#00ffff", underline=1)
+        self.about_text.tag_bind("link_email", "<Button-1>", lambda e: os.system(f'start mailto:{CONTACT_EMAIL}'))
+        self.about_text.tag_bind("link_github", "<Button-1>", lambda e: webbrowser.open(GITHUB_URL))
+        self.about_text.config(state='disabled')
+        self.about_text.pack(padx=10, pady=20, fill=tk.BOTH, expand=True)
 
         self.history_text = scrolledtext.ScrolledText(self.history_frame, height=20, bg="#0d0d0d", fg="#00ffff", font=('Courier New', 9))
         self.history_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
@@ -122,6 +141,9 @@ GitHub: {GITHUB_URL}
         self.tree.tag_configure('offline', background="#1a0000", foreground="#ff003c")
         self.tree.tag_configure('unknown', background="#1e1e1e", foreground="#ffcc00")
         self.tree.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+
+        self.tooltip = tk.Label(self.main_frame, text="", bg="black", fg="#00ffff", font=("Share Tech Mono", 9), bd=1, relief=tk.SOLID)
+        self.tree.bind("<Motion>", self.on_hover)
 
         self.log_box = scrolledtext.ScrolledText(self.main_frame, height=8, state='disabled', bg="#0d0d0d", fg="#e0e0e0", font=('Courier New', 9))
         self.log_box.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
@@ -177,9 +199,9 @@ GitHub: {GITHUB_URL}
         win.configure(bg='black')
         win.geometry('400x150+600+300')
         win.overrideredirect(True)
-        label = tk.Label(win, text="Pwned by The Methodical One", fg="red", bg="black", font=("Consolas", 16, "bold"))
+        label = tk.Label(win, text="You shouldn't be here. Go back to work!\nPwned by The Methodical One", fg="red", bg="black", font=("Consolas", 14, "bold"))
         label.pack(expand=True)
-        win.after(2000, win.destroy)
+        win.after(3000, win.destroy)
 
     def manual_ping_all(self):
         for device in devices:
@@ -196,6 +218,19 @@ GitHub: {GITHUB_URL}
         ping_interval = config['ping_interval_seconds']
         email_config = config['gmail']
         self.log_to_gui("Configuration reloaded.")
+
+    def on_hover(self, event):
+        item = self.tree.identify_row(event.y)
+        if item:
+            device_name = self.tree.item(item, 'values')[0]
+            device = next((d for d in devices if d['name'] == device_name), None)
+            if device:
+                tip = f"IP: {device['ip']}\nMAC: {device['mac']}"
+                self.tooltip.config(text=tip)
+                self.tooltip.place(x=event.x_root - self.master.winfo_rootx() + 20,
+                                   y=event.y_root - self.master.winfo_rooty() + 10)
+        else:
+            self.tooltip.place_forget()
 
 # Monitoring Thread
 def monitor_devices(app):
