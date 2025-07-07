@@ -1,0 +1,55 @@
+{
+  "ping_interval_seconds": 60,
+  "gmail": {
+    "from": "network.bot@example.com",
+    "to": "admin@example.com",
+    "app_password": "your-fake-app-password"
+  },
+  "devices": [
+    {
+      "name": "Warp Core",
+      "ip": "192.168.42.10",
+      "mac": "AA:BB:CC:00:00:01"
+    },
+    {
+      "name": "Holodeck",
+      "ip": "192.168.42.11",
+      "mac": "AA:BB:CC:00:00:02"
+    },
+    {
+      "name": "Bridge Console",
+      "ip": "192.168.42.12",
+      "mac": "AA:BB:CC:00:00:03"
+    },
+    {
+      "name": "Engineering Bay",
+      "ip": "192.168.42.13",
+      "mac": "AA:BB:CC:00:00:04"
+    },
+    {
+      "name": "Mainframe",
+      "ip": "192.168.42.14",
+      "mac": "AA:BB:CC:00:00:05"
+    },
+    {
+      "name": "Cryo Chamber",
+      "ip": "192.168.42.15",
+      "mac": "AA:BB:CC:00:00:06"
+    },
+    {
+      "name": "Starlight Node",
+      "ip": "192.168.42.16",
+      "mac": "AA:BB:CC:00:00:07"
+    },
+    {
+      "name": "Astro Lab",
+      "ip": "192.168.42.17",
+      "mac": "AA:BB:CC:00:00:08"
+    },
+    {
+      "name": "Nebula Drive",
+      "ip": "192.168.42.18",
+      "mac": "AA:BB:CC:00:00:09"
+    }
+  ]
+}
