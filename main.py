@@ -44,6 +44,8 @@ logging.basicConfig(
 device_status = {device['ip']: None for device in devices}
 last_seen = {device['ip']: "N/A" for device in devices}
 outage_history = {device['ip']: [] for device in devices}
+offline_streaks = {device['ip']: 0 for device in devices}
+email_state = {device['ip']: {'notified_offline': False, 'notified_online': False} for device in devices}
 
 # Icon paths
 ICON_PATHS = {
@@ -244,18 +246,31 @@ def monitor_devices(app):
             previous = device_status[ip]
             device_status[ip] = is_online
 
-            if previous is not None and previous != is_online:
-                ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                status_text = "ONLINE" if is_online else "OFFLINE"
-                outage_history[ip].append((ts, status_text))
-                message = f"{name} ({ip}) is now {status_text}"
-                logging.info(message)
-                app.log_to_gui(message)
-                winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
-                send_email(f"[Alert] {name} is {status_text}", message)
-
             if is_online:
                 last_seen[ip] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                offline_streaks[ip] = 0
+                if not email_state[ip]['notified_online']:
+                    message = f"{name} ({ip}) is now ONLINE"
+                    logging.info(message)
+                    app.log_to_gui(message)
+                    winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
+                    send_email(f"[Recovery] {name} is back ONLINE", message)
+                    email_state[ip] = {'notified_offline': False, 'notified_online': True}
+            else:
+                offline_streaks[ip] += 1
+                if offline_streaks[ip] == 3 and not email_state[ip]['notified_offline']:
+                    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    outage_history[ip].append((ts, "OFFLINE"))
+                    message = f"{name} ({ip}) has been OFFLINE for 3 checks"
+                    logging.info(message)
+                    app.log_to_gui(message)
+                    winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
+                    send_email(f"[Alert] {name} is OFFLINE", message)
+                    email_state[ip] = {'notified_offline': True, 'notified_online': False}
+                elif offline_streaks[ip] < 3:
+                    message = f"{name} ({ip}) offline streak: {offline_streaks[ip]}"
+                    logging.info(message)
+                    app.log_to_gui(message)
 
         time.sleep(ping_interval)
 
