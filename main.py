@@ -28,6 +28,7 @@ def load_config():
 config = load_config()
 devices = sorted(config['devices'], key=lambda d: d['name'])
 ping_interval = config['ping_interval_seconds']
+alert_threshold = config.get('offline_alert_threshold', 3)
 email_config = config['gmail']
 
 # Setup logging
@@ -44,8 +45,8 @@ logging.basicConfig(
 device_status = {device['ip']: None for device in devices}
 last_seen = {device['ip']: "N/A" for device in devices}
 outage_history = {device['ip']: [] for device in devices}
-offline_streaks = {device['ip']: 0 for device in devices}
-email_state = {device['ip']: {'notified_offline': False, 'notified_online': False} for device in devices}
+consecutive_offline = {device['ip']: 0 for device in devices}
+silenced = {device['ip']: False for device in devices}
 
 # Icon paths
 ICON_PATHS = {
@@ -214,10 +215,11 @@ class MonitorApp:
             self.log_to_gui(f"Manual check: {name} is {status_text}")
 
     def reload_config(self):
-        global config, devices, ping_interval, email_config
+        global config, devices, ping_interval, email_config, alert_threshold
         config = load_config()
         devices = sorted(config['devices'], key=lambda d: d['name'])
         ping_interval = config['ping_interval_seconds']
+        alert_threshold = config.get('offline_alert_threshold', 3)
         email_config = config['gmail']
         self.log_to_gui("Configuration reloaded.")
 
@@ -246,31 +248,31 @@ def monitor_devices(app):
             previous = device_status[ip]
             device_status[ip] = is_online
 
-            if is_online:
-                last_seen[ip] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                offline_streaks[ip] = 0
-                if not email_state[ip]['notified_online']:
-                    message = f"{name} ({ip}) is now ONLINE"
-                    logging.info(message)
-                    app.log_to_gui(message)
-                    winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
-                    send_email(f"[Recovery] {name} is back ONLINE", message)
-                    email_state[ip] = {'notified_offline': False, 'notified_online': True}
-            else:
-                offline_streaks[ip] += 1
-                if offline_streaks[ip] == 3 and not email_state[ip]['notified_offline']:
+            if not is_online:
+                consecutive_offline[ip] += 1
+                if consecutive_offline[ip] >= alert_threshold and not silenced[ip]:
                     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    outage_history[ip].append((ts, "OFFLINE"))
-                    message = f"{name} ({ip}) has been OFFLINE for 3 checks"
+                    status_text = "OFFLINE"
+                    outage_history[ip].append((ts, status_text))
+                    message = f"{name} ({ip}) is now {status_text}"
                     logging.info(message)
                     app.log_to_gui(message)
                     winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
-                    send_email(f"[Alert] {name} is OFFLINE", message)
-                    email_state[ip] = {'notified_offline': True, 'notified_online': False}
-                elif offline_streaks[ip] < 3:
-                    message = f"{name} ({ip}) offline streak: {offline_streaks[ip]}"
+                    send_email(f"[Alert] {name} is {status_text}", message)
+                    silenced[ip] = True
+            else:
+                if previous is False:
+                    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    status_text = "ONLINE"
+                    outage_history[ip].append((ts, status_text))
+                    message = f"{name} ({ip}) is now {status_text}"
                     logging.info(message)
                     app.log_to_gui(message)
+                    winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
+                    send_email(f"[Alert] {name} is {status_text}", message)
+                consecutive_offline[ip] = 0
+                silenced[ip] = False
+                last_seen[ip] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         time.sleep(ping_interval)
 
