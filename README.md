@@ -18,7 +18,8 @@ A sleek Python-based network monitor designed to keep an eye on multiple devices
 
 ## 📷 Screenshots
 
-*Coming soon...*
+![image](https://github.com/user-attachments/assets/a70cad6c-de2f-4523-bf7d-b1de1136bf4b)
+
 
 ## 🚀 Getting Started
 
