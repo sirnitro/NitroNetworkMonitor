@@ -7,12 +7,13 @@ A sleek Python-based network monitor designed to keep an eye on multiple devices
 - Monitors multiple IP addresses
 - Real-time status updates
 - Logs events with timestamps
-- Email alerts via Gmail when devices go offline
+- Email alerts via Gmail when devices go offline/online
+- Custom alert threholds
+- Auto-silence for flapping devices
 - Splash screen & tray icon support (broken)
 - Outage history (last 10 status changes per device)
 - "Last seen online" tracking
 - Refresh button for instant updates
-- Cyberpunk-themed UI
 - Hidden easter egg (try `Ctrl+Shift+H`)
 - Cross-tab layout: Monitor • Outage History • About
 
