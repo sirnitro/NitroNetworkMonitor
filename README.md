@@ -52,7 +52,7 @@ python main.py
 - Email: nitro7@nitro7.com
 - GitHub: github.com/sirnitro
 
-### ✅ `config.json` (with fake info)
+### ✅ `config.json` 
 
 ```json
 {
@@ -80,5 +80,5 @@ python main.py
     }
   ]
 }
-
+```
 💡 Note: You must use a Gmail App Password instead of your regular Gmail password.
