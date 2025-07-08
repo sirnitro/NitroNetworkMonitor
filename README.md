@@ -8,7 +8,7 @@ A sleek Python-based network monitor designed to keep an eye on multiple devices
 - Real-time status updates
 - Logs events with timestamps
 - Email alerts via Gmail when devices go offline
-- Splash screen & tray icon support
+- Splash screen & tray icon support (broken)
 - Outage history (last 10 status changes per device)
 - "Last seen online" tracking
 - Refresh button for instant updates
