@@ -1,5 +1,6 @@
 {
   "ping_interval_seconds": 60,
+  "offline_alert_threshold": 3,
   "gmail": {
     "from": "tmnt.monitor@example.com",
     "to": "splinter@example.com",
