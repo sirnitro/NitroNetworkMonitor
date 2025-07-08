@@ -33,7 +33,7 @@ A sleek Python-based network monitor designed to keep an eye on multiple devices
 3. Run the app:
 ```bash
 python main.py
-
+```
 ## 🛠 Built With
 - Python 3.x
 - Tkinter
