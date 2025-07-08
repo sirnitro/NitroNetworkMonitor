@@ -95,10 +95,12 @@ class MonitorApp:
         self.main_frame = tk.Frame(self.tab_control, bg="#0d0d0d")
         self.history_frame = tk.Frame(self.tab_control, bg="#0d0d0d")
         self.about_frame = tk.Frame(self.tab_control, bg="#0d0d0d")
+        self.log_frame = tk.Frame(self.tab_control, bg="#0d0d0d")
 
         self.tab_control.add(self.main_frame, text=' Monitor ')
         self.tab_control.add(self.history_frame, text=' Outage History ')
         self.tab_control.add(self.about_frame, text=' About ')
+        self.tab_control.add(self.log_frame, text=' Log File ')
         self.tab_control.pack(expand=1, fill="both")
 
         self.about_text = tk.Text(self.about_frame, height=14, bg="#0d0d0d", fg="#00ffff", font=("Share Tech Mono", 10), borderwidth=0, highlightthickness=0)
@@ -122,6 +124,13 @@ class MonitorApp:
         self.about_text.tag_bind("link_github", "<Button-1>", lambda e: webbrowser.open(GITHUB_URL))
         self.about_text.config(state='disabled')
         self.about_text.pack(padx=10, pady=20, fill=tk.BOTH, expand=True)
+        self.log_text = scrolledtext.ScrolledText(self.log_frame, height=20, bg="#0d0d0d", fg="#00ffff", font=('Courier New', 9))
+        self.log_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=(10, 5))
+
+        self.clear_log_btn = tk.Button(self.log_frame, text="Clear Log", command=self.clear_log, bg="#111111", fg="#00ffff")
+        self.clear_log_btn.pack(pady=(0, 10))
+
+        self.load_log_file()    
 
         self.history_text = scrolledtext.ScrolledText(self.history_frame, height=20, bg="#0d0d0d", fg="#00ffff", font=('Courier New', 9))
         self.history_text.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
@@ -152,6 +161,21 @@ class MonitorApp:
         self.log_box.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
 
         self.update_gui()
+
+    def load_log_file(self):
+        try:
+            with open('logs/monitor.log', 'r') as f:
+                self.log_text.config(state='normal')
+                self.log_text.delete('1.0', tk.END)
+                self.log_text.insert(tk.END, f.read())
+                self.log_text.config(state='disabled')
+        except Exception as e:
+            self.log_text.insert(tk.END, f"Failed to load log file: {e}\n")
+
+    def clear_log(self):
+        open('logs/monitor.log', 'w').close()
+        self.load_log_file()
+
 
     def update_gui(self):
         online_count = 0
@@ -221,7 +245,7 @@ class MonitorApp:
         ping_interval = config['ping_interval_seconds']
         alert_threshold = config.get('offline_alert_threshold', 3)
         email_config = config['gmail']
-        self.log_to_gui("Configuration reloaded.")
+        self.log_to_gui("Configuration reloaded. Status updated at next interval.")
 
     def on_hover(self, event):
         item = self.tree.identify_row(event.y)
@@ -250,16 +274,18 @@ def monitor_devices(app):
 
             if not is_online:
                 consecutive_offline[ip] += 1
-                if consecutive_offline[ip] >= alert_threshold and not silenced[ip]:
-                    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    status_text = "OFFLINE"
+                ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                status_text = "OFFLINE"
+                message = f"{name} ({ip}) is now {status_text}"
+                if consecutive_offline[ip] == alert_threshold and not silenced[ip]:
                     outage_history[ip].append((ts, status_text))
-                    message = f"{name} ({ip}) is now {status_text}"
                     logging.info(message)
-                    app.log_to_gui(message)
-                    winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
                     send_email(f"[Alert] {name} is {status_text}", message)
                     silenced[ip] = True
+                if previous is not False:
+                    # Log GUI regardless of threshold
+                    app.log_to_gui(message)
+
             else:
                 if previous is False:
                     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
